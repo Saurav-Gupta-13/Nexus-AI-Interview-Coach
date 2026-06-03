@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import PDFParser from 'pdf2json';
-
 import Groq from 'groq-sdk';
+import { checkRateLimit } from '@/lib/ratelimit';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1';
+    const isAllowed = await checkRateLimit(ip);
+    
+    if (!isAllowed) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    }
+
     const formData = await req.formData();
     const file = formData.get('resume') as File | null;
 

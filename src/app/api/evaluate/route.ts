@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { checkRateLimit } from '@/lib/ratelimit';
 
 // Initialize Groq client
 const groq = new Groq({
@@ -8,6 +9,12 @@ const groq = new Groq({
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1';
+    const isAllowed = await checkRateLimit(ip);
+    
+    if (!isAllowed) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    }
     const { question, answer, confidenceScore, code, resumeText, questionIndex = 0 } = await req.json();
 
     if (!answer) {
