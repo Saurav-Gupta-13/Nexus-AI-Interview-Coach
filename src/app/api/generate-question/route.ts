@@ -43,10 +43,12 @@ ${resumeText || 'No resume provided. Ask a general background question about the
     } else {
       // Follow-up question generation with progressive difficulty
       let difficultyInstruction = '';
-      if (questionIndex === 1) {
-        difficultyInstruction = 'This is Question 2. Ask a foundational/core technical question to test their basic theoretical knowledge of the role requirements.';
-      } else if (questionIndex >= 2) {
-        difficultyInstruction = 'This is Question 3 or later. Ask an ADVANCED, hard technical question, a system design question, or a coding task. Push their limits.';
+      if (questionIndex === 1 || questionIndex === 2) {
+        difficultyInstruction = 'This is Question ' + (questionIndex + 1) + '. Ask a theoretical or behavioral question. DO NOT ask a coding question.';
+      } else if (questionIndex === 3) {
+        difficultyInstruction = 'This is Question 4. You MUST ask a strict, hands-on CODING QUESTION (e.g. data structures, algorithms, or practical implementation). Determine if it should be "easy", "medium", or "hard" based on their resume.';
+      } else if (questionIndex === 4) {
+        difficultyInstruction = 'This is Question 5, the final question. Ask an advanced system design or architecture question. DO NOT ask a coding question.';
       }
 
       prompt = `
@@ -56,7 +58,8 @@ ${difficultyInstruction}
 Return ONLY a valid JSON object in the following format:
 {
   "question": "The interview question",
-  "isCodingQuestion": true/false // Set to true ONLY if you are asking them to write code (e.g. write a function, implement an algorithm)
+  "isCodingQuestion": ${questionIndex === 3 ? "true" : "false"}, // Strict boolean
+  "difficulty": "easy" // IF AND ONLY IF isCodingQuestion is true, provide the difficulty ("easy", "medium", or "hard"). Otherwise omit or set to null.
 }
 
 Job Description: ${jobDescription}

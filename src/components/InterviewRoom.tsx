@@ -409,10 +409,14 @@ export default function InterviewRoom() {
         if (evaluation.isCodingQuestion) {
           setCodeContent('// Write your code here...');
           setActiveTab('editor');
+          let codingTimer = 3900; // Hard default: 65 mins
+          if (evaluation.difficulty === 'easy') codingTimer = 2100; // 35 mins
+          else if (evaluation.difficulty === 'medium') codingTimer = 3000; // 50 mins
+          setTimeLeft(codingTimer);
         } else {
           setActiveTab('feedback');
+          setTimeLeft(300); // Reset standard 5 min timer
         }
-        setTimeLeft(300); // Reset timer
         setHintText('');
         setHintRequested(false);
       }
@@ -462,7 +466,14 @@ export default function InterviewRoom() {
         setIsCodingQuestion(data.isCodingQuestion || false);
         setActiveTab(data.isCodingQuestion ? 'editor' : 'feedback');
         setFeedback(null);
-        setTimeLeft(300); // Reset timer
+        if (data.isCodingQuestion) {
+          let codingTimer = 3900; // Hard default
+          if (data.difficulty === 'easy') codingTimer = 2100;
+          else if (data.difficulty === 'medium') codingTimer = 3000;
+          setTimeLeft(codingTimer);
+        } else {
+          setTimeLeft(300); // Reset standard timer
+        }
         setHintText('');
         setHintRequested(false);
       }
@@ -550,7 +561,14 @@ export default function InterviewRoom() {
         setIsCodingQuestion(data.isCodingQuestion || false);
         setActiveTab(data.isCodingQuestion ? 'editor' : 'feedback');
         setIsSetupMode(false);
-        setTimeLeft(300); // Reset timer
+        if (data.isCodingQuestion) {
+          let codingTimer = 3900; // Hard default
+          if (data.difficulty === 'easy') codingTimer = 2100;
+          else if (data.difficulty === 'medium') codingTimer = 3000;
+          setTimeLeft(codingTimer);
+        } else {
+          setTimeLeft(300); // Reset standard timer
+        }
         setHintText('');
         setHintRequested(false);
       } else {
