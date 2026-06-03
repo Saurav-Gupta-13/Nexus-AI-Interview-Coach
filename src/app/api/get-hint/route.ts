@@ -5,7 +5,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: NextRequest) {
   try {
-    const { question, resumeText, jobDescription } = await req.json();
+    const { question } = await req.json();
 
     if (!question) {
       return NextResponse.json({ error: 'Question is required' }, { status: 400 });
@@ -28,10 +28,10 @@ Do not write any code for them. Keep it extremely concise and encouraging.`;
     const hint = chatCompletion.choices[0]?.message?.content || "Consider breaking the problem down into smaller, testable functions.";
 
     return NextResponse.json({ hint });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Groq Hint Generation Error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate hint', details: error.message },
+      { error: 'Failed to generate hint', details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

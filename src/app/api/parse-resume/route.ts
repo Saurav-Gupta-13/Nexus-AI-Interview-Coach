@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         reject(errData.parserError);
       });
       
-      pdfParser.on('pdfParser_dataReady', (pdfData) => {
+      pdfParser.on('pdfParser_dataReady', () => {
         resolve(pdfParser.getRawTextContent());
       });
 
