@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     // pdf2json uses an event-based approach, so we wrap it in a Promise
     const text: string = await new Promise((resolve, reject) => {
-      const pdfParser = new PDFParser(null, 1);
+      const pdfParser = new PDFParser(null, true);
       
       pdfParser.on('pdfParser_dataError', (errData) => {
         reject(errData.parserError);
