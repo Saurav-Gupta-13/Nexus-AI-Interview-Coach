@@ -52,8 +52,12 @@ export default function InterviewRoom() {
   // Pre-Interview Rules & Proctoring States
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [warningsCount, setWarningsCount] = useState(0);
-  const [showWarning, setShowWarning] = useState(false);
   const missingFaceFramesRef = useRef(0);
+  const stateRefs = useRef({ isSetupMode, isFinished, showRulesModal });
+
+  useEffect(() => {
+    stateRefs.current = { isSetupMode, isFinished, showRulesModal };
+  }, [isSetupMode, isFinished, showRulesModal]);
 
   // New states for Step 5 (Dashboard)
   const [isFinished, setIsFinished] = useState(false);
@@ -113,15 +117,6 @@ export default function InterviewRoom() {
       }]);
     }
   }, [warningsCount, isFinished]);
-
-  // Handle showing the warning toast
-  useEffect(() => {
-    if (warningsCount > 0 && warningsCount < 3) {
-      setShowWarning(true);
-      const timer = setTimeout(() => setShowWarning(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [warningsCount]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -229,10 +224,14 @@ export default function InterviewRoom() {
           // No face detected!
           missingFaceFramesRef.current += 1;
           
+          const { isSetupMode: setup, isFinished: finished, showRulesModal: rules } = stateRefs.current;
+          
           // 30 fps * 1.5 seconds = 45 frames.
-          if (missingFaceFramesRef.current > 45 && !isSetupMode && !isFinished && !showRulesModal) {
+          if (missingFaceFramesRef.current > 45 && !setup && !finished && !rules) {
              missingFaceFramesRef.current = 0; // Reset to avoid constant firing
              setWarningsCount(prev => prev + 1);
+             setIsCheating(true);
+             setTimeout(() => setIsCheating(false), 3000);
           }
 
           setConfidenceScore((prev) => (prev * 0.9) + (0 * 0.1));
@@ -766,6 +765,25 @@ export default function InterviewRoom() {
 
 
 
+      {/* Big Red Flash Warning for Anti-Cheat */}
+      <AnimatePresence>
+        {isCheating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center bg-rose-600/20 backdrop-blur-md"
+          >
+            <div className="bg-rose-950/95 text-white px-12 py-12 rounded-3xl shadow-[0_0_150px_rgba(225,29,72,0.8)] border border-rose-500/50 flex flex-col items-center animate-pulse">
+              <span className="text-7xl mb-6 drop-shadow-[0_0_20px_rgba(225,29,72,0.8)]">⚠️</span>
+              <h2 className="text-5xl font-black tracking-tighter uppercase mb-4 text-rose-500 drop-shadow-[0_0_20px_rgba(225,29,72,0.5)]">Focus Warning</h2>
+              <p className="text-rose-100 font-bold text-2xl tracking-wide">Proctoring Violation detected!</p>
+              <p className="text-slate-400 mt-3 font-medium">Tab switching or looking away is strictly prohibited.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div 
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -773,26 +791,6 @@ export default function InterviewRoom() {
         className="z-10 w-full max-w-[98vw] lg:max-w-[1600px] flex flex-col space-y-8"
       >
         
-        {/* Anti-Cheat Warning Toast */}
-        <AnimatePresence>
-          {showWarning && (
-            <motion.div 
-              initial={{ opacity: 0, y: -50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              className="fixed top-10 left-1/2 -translate-x-1/2 z-[150] bg-rose-600 border-2 border-rose-400 text-white px-8 py-4 rounded-2xl shadow-[0_0_40px_rgba(225,29,72,0.8)] flex items-center space-x-4 max-w-2xl"
-            >
-              <AlertTriangle className="w-10 h-10 animate-pulse text-white shrink-0" />
-              <div>
-                <h3 className="font-black text-xl tracking-wider uppercase mb-1">Proctoring Warning {warningsCount}/3</h3>
-                <p className="font-medium text-rose-100 leading-tight">
-                  Tab switching or leaving the camera view is strictly prohibited. After 3 attempts, your interview will terminate.
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Header */}
         <header className="flex justify-between items-center w-full px-6 py-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl">
           <div className="flex items-center space-x-3">
