@@ -638,7 +638,7 @@ export default function InterviewRoom() {
 
   if (isSetupMode) {
     return (
-      <div className="w-full flex justify-center font-sans text-slate-100 mt-2 relative z-20">
+      <div className="w-full flex justify-center font-sans text-slate-100 mt-2">
         
         {/* Pre-Interview Rules Disclaimer Modal */}
         <AnimatePresence>
@@ -647,12 +647,12 @@ export default function InterviewRoom() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md px-4"
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md px-4 py-20 overflow-y-auto"
             >
               <motion.div 
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
-                className="bg-slate-900 border border-slate-700 p-8 md:p-10 rounded-3xl max-w-2xl w-full shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col items-center text-center relative overflow-hidden"
+                className="bg-slate-900 border border-slate-700 p-8 md:p-10 rounded-3xl max-w-2xl w-full shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col items-center text-center relative overflow-hidden my-auto shrink-0"
               >
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
                 <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 border border-emerald-500/20">
