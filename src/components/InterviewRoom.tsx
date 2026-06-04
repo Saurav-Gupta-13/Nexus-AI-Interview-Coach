@@ -59,8 +59,8 @@ export default function InterviewRoom() {
   // New states for Step 5 (Dashboard)
   const [isFinished, setIsFinished] = useState(false);
   const [feedbackHistory, setFeedbackHistory] = useState<any[]>([]);
-  const [confidenceSum, setConfidenceSum] = useState(0);
-  const [confidenceCount, setConfidenceCount] = useState(0);
+  const trueConfidenceSumRef = useRef(0);
+  const trueConfidenceCountRef = useRef(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -218,7 +218,12 @@ export default function InterviewRoom() {
             targetScore = 0;
           }
 
-          setConfidenceScore((prev) => (prev * 0.5) + (targetScore * 0.5)); // Extremely reactive transition
+          setConfidenceScore((prev) => {
+            const newScore = (prev * 0.5) + (targetScore * 0.5); // Extremely reactive transition
+            trueConfidenceSumRef.current += newScore;
+            trueConfidenceCountRef.current += 1;
+            return newScore;
+          });
 
           // Render subtle facial tracking mesh
           canvasCtx.fillStyle = 'rgba(34, 197, 94, 0.7)'; // Bright Emerald Green dots
@@ -263,7 +268,12 @@ export default function InterviewRoom() {
             }
           }
 
-          setConfidenceScore((prev) => (prev * 0.9) + (0 * 0.1));
+          setConfidenceScore((prev) => {
+            const newScore = (prev * 0.9) + (0 * 0.1);
+            trueConfidenceSumRef.current += newScore;
+            trueConfidenceCountRef.current += 1;
+            return newScore;
+          });
         }
         canvasCtx.restore();
       }
@@ -454,8 +464,6 @@ export default function InterviewRoom() {
         evaluation: evaluation.evaluation,
         score: finalScore
       }]);
-      setConfidenceSum(prev => prev + confidenceScore);
-      setConfidenceCount(prev => prev + 1);
 
       // If the AI suggested a next question in the evaluation, we can use it!
       if (questionIndex >= 5) {
@@ -797,7 +805,7 @@ export default function InterviewRoom() {
   }
 
   if (isFinished) {
-    const avgConfidence = confidenceCount > 0 ? Math.round(confidenceSum / confidenceCount) : 100;
+    const avgConfidence = trueConfidenceCountRef.current > 0 ? Math.round(trueConfidenceSumRef.current / trueConfidenceCountRef.current) : 100;
     return (
       <div className="w-full min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-4 sm:p-8 font-sans text-slate-100 overflow-hidden relative">
         {/* Abstract Background Glows */}
