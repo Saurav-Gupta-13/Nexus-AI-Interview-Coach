@@ -94,18 +94,10 @@ export default function InterviewRoom() {
       }
     };
 
-    const handleBlur = () => {
-      setIsCheating(true);
-      setConfidenceScore(0);
-      setTimeout(() => setIsCheating(false), 3000);
-    };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleBlur);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleBlur);
     };
   }, [isSetupMode, isFinished]);
 
@@ -436,7 +428,7 @@ export default function InterviewRoom() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: currentQuestion,
-          answer: text,
+          answer: finalTranscript,
           confidenceScore: Math.round(confidenceScore),
           code: isCodingQuestion ? codeContent : null,
           resumeText,
