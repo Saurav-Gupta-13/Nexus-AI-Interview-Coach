@@ -46,7 +46,7 @@ ${resumeText || 'No resume provided. Ask a general background question about the
       if (questionIndex === 1 || questionIndex === 2) {
         difficultyInstruction = 'This is Question ' + (questionIndex + 1) + '. Ask a theoretical or behavioral question. DO NOT ask a coding question.';
       } else if (questionIndex === 3) {
-        difficultyInstruction = 'This is Question 4. You MUST ask a strict, hands-on CODING QUESTION (e.g. data structures, algorithms, or practical implementation). Determine if it should be "easy", "medium", or "hard" based on their resume.';
+        difficultyInstruction = 'This is Question 4. IF the candidate is applying for a Computer Science, Software Engineering, or Coding-related role, you MUST ask a strict, hands-on CODING QUESTION and determine its difficulty ("easy", "medium", or "hard"). IF their domain is NON-CODING (e.g. Marketing, HR, Finance, Design), ask an advanced theoretical question specific to their domain instead and DO NOT ask a coding question.';
       } else if (questionIndex === 4) {
         difficultyInstruction = 'This is Question 5, the final question. Ask an advanced system design or architecture question. DO NOT ask a coding question.';
       }
@@ -58,7 +58,7 @@ ${difficultyInstruction}
 Return ONLY a valid JSON object in the following format:
 {
   "question": "The interview question",
-  "isCodingQuestion": ${questionIndex === 3 ? "true" : "false"}, // Strict boolean
+  "isCodingQuestion": ${questionIndex === 3 ? "true/false, // Set to true ONLY if you asked a coding question, false otherwise" : "false,"}
   "difficulty": "easy" // IF AND ONLY IF isCodingQuestion is true, provide the difficulty ("easy", "medium", or "hard"). Otherwise omit or set to null.
 }
 
