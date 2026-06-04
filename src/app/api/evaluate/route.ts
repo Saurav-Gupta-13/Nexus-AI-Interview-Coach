@@ -30,27 +30,49 @@ export async function POST(req: Request) {
 
     // The Single-Prompt Multi-Agent Pattern
     const prompt = `
-You are an expert technical interviewer evaluating a candidate's answer.
+You are a senior technical interviewer at a top-tier tech company. You must evaluate this candidate's spoken answer with EXTREME semantic awareness and practical judgment.
+
 Question Asked: "${question}"
 Candidate's Spoken Answer: "${answer}"
 ${code ? `Candidate's Code Submission:\n\`\`\`\n${code}\n\`\`\`\n` : ''}
 Candidate's Eye-Contact/Confidence Score (from CV model): ${confidenceScore}/100
-Job Description: (Provided previously)
 Candidate's Resume Text: ${resumeText || 'No resume provided.'}
 
-CRITICAL EVALUATION GUIDELINES:
-- Evaluate the candidate "humanistically". Focus on whether they understand the core concepts, logic, and intent.
-- DO NOT penalize them for not using exact textbook definitions or specific jargon if their explanation is conceptually correct.
-- Candidates often speak conversationally. Forgive minor grammatical errors or conversational filler (ums, ahs).
-- If they submitted code, evaluate the logic and problem-solving approach. Minor syntax errors are acceptable if the core logic is sound.
+═══════════════════════════════════════════════
+HUMANISTIC SEMANTIC EVALUATION RULES (CRITICAL):
+═══════════════════════════════════════════════
+
+1. SEMANTIC MATCHING (Most Important):
+   - Focus ENTIRELY on the MEANING and INTENT behind their words, NOT the exact phrasing.
+   - If they explain a concept correctly using informal or non-textbook language, that is STILL a correct answer. Give them full credit.
+   - Spoken language is messy. Ignore filler words (um, uh, like, basically, you know), false starts, and self-corrections. Extract the core meaning.
+
+2. IRRELEVANCE DETECTION:
+   - If the candidate's answer is COMPLETELY unrelated to the question (e.g., talking about cooking when asked about databases), score MUST be 0.
+   - If they partially address the question but miss key parts, score proportionally (30-60 range).
+   - If they demonstrate strong conceptual understanding even without perfect structure, score generously (70-90 range).
+
+3. PRACTICAL FAIRNESS:
+   - Remember these are SPOKEN answers, not written essays. Be forgiving of grammar and structure.
+   - If they give a real-world example that demonstrates understanding, that counts as much as a textbook definition.
+   - Nervous candidates may ramble — look past the rambling for the core knowledge underneath.
+   - For coding questions: focus on logic and approach. Minor syntax errors in spoken code descriptions are expected.
+
+4. SCORING GUIDE:
+   - 0-10: Completely irrelevant, nonsensical, or refused to answer
+   - 11-30: Vaguely related but fundamentally wrong understanding
+   - 31-50: Partially correct, missing critical core concepts
+   - 51-70: Decent understanding, but incomplete or slightly off
+   - 71-85: Strong conceptual understanding with minor gaps
+   - 86-100: Excellent, comprehensive answer demonstrating deep understanding
 
 Evaluate the candidate's response and generate the next question. Return ONLY a valid JSON object in the exact following format:
 {
-  "score": (0-100 integer representing conceptual accuracy, logic, and completeness. Be fair but rigorous.),
-  "evaluation": "Detailed technical feedback. Acknowledge what they got right conceptually, and gently point out any missing core logic.",
-  "feedback_tip": "One concise tip for improvement.",
+  "score": (0-100 integer. Apply semantic evaluation rules above strictly.),
+  "evaluation": "2-3 sentence feedback. Acknowledge what they understood correctly (semantically), then note any missing concepts. Be encouraging but honest.",
+  "feedback_tip": "One concise, actionable tip for improvement.",
   "next_question": "A logical follow-up question, or a new topic question to continue the interview. ${difficultyInstruction}",
-  "isCodingQuestion": true/false // Set to true ONLY if 'next_question' requires them to write code
+  "isCodingQuestion": true/false
 }
     `;
 

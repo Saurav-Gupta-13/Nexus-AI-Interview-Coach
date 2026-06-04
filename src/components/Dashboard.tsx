@@ -78,10 +78,39 @@ export default function Dashboard({ feedbackHistory, averageConfidence }: Dashbo
             </svg>
             <span className="text-5xl font-black text-white">{overallScore}</span>
           </div>
+          <p className="text-xs text-slate-500 mt-4 z-10 text-center">Average of Technical + Communication + Eye Contact</p>
+        </Card>
+
+        {/* Score Breakdown Card */}
+        <Card className="col-span-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+          <h3 className="text-sm uppercase tracking-widest text-slate-400 font-bold mb-5">Score Breakdown</h3>
+          <div className="space-y-4">
+            {[
+              { label: 'Technical Depth', score: avgTechnicalScore, color: 'from-indigo-500 to-indigo-400', desc: 'Avg. of all question scores' },
+              { label: 'Communication', score: avgCommunicationScore, color: 'from-cyan-500 to-cyan-400', desc: 'Derived from answer quality' },
+              { label: 'Eye Contact', score: actualConfidence, color: 'from-emerald-500 to-emerald-400', desc: 'Live CV model confidence' },
+              { label: 'Problem Solving', score: problemSolvingScore, color: 'from-amber-500 to-amber-400', desc: 'Logic & approach score' },
+              { label: 'Confidence', score: finalConfidenceScore, color: 'from-rose-500 to-rose-400', desc: 'Eye contact + communication avg' },
+            ].map((item) => (
+              <div key={item.label}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="text-sm font-semibold text-slate-300">{item.label}</span>
+                  <span className="text-sm font-black text-white">{item.score}<span className="text-slate-500 text-xs font-normal">/100</span></span>
+                </div>
+                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full bg-gradient-to-r ${item.color} transition-all duration-1000 ease-out`}
+                    style={{ width: `${item.score}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-600 mt-0.5">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </Card>
 
         {/* Radar Chart */}
-        <Card className="col-span-1 md:col-span-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+        <Card className="col-span-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
           <h3 className="text-sm uppercase tracking-widest text-slate-400 font-bold mb-4">Competency Map</h3>
           <div className="w-full h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
