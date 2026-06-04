@@ -115,7 +115,7 @@ export default function InterviewRoom() {
       setConfidenceScore(0);
       setFeedbackHistory(prev => [...prev, {
         question: "INTERVIEW TERMINATED (ANTI-CHEAT)",
-        evaluation: "User failed anti-cheat proctoring checks (Face removed from camera OR switched tabs) 3 times.",
+        evaluation: "User failed anti-cheat proctoring checks. Tab switching was detected 3 times.",
         score: 0
       }]);
     }
@@ -800,8 +800,8 @@ export default function InterviewRoom() {
             <div className="bg-rose-950/95 text-white px-12 py-12 rounded-3xl shadow-[0_0_150px_rgba(225,29,72,0.8)] border border-rose-500/50 flex flex-col items-center animate-pulse">
               <span className="text-7xl mb-6 drop-shadow-[0_0_20px_rgba(225,29,72,0.8)]">⚠️</span>
               <h2 className="text-5xl font-black tracking-tighter uppercase mb-4 text-rose-500 drop-shadow-[0_0_20px_rgba(225,29,72,0.5)]">Focus Warning</h2>
-              <p className="text-rose-100 font-bold text-2xl tracking-wide">Proctoring Violation detected!</p>
-              <p className="text-slate-400 mt-3 font-medium">Tab switching or looking away is strictly prohibited.</p>
+              <p className="text-rose-100 font-bold text-2xl tracking-wide">Tab Switching Detected!</p>
+              <p className="text-slate-400 mt-3 font-medium">Please return your focus to the interview.</p>
             </div>
           </motion.div>
         )}
@@ -820,8 +820,8 @@ export default function InterviewRoom() {
               <div className="relative flex items-center justify-center mb-8">
                 <span className="text-8xl animate-pulse drop-shadow-[0_0_30px_rgba(234,88,12,1)] text-orange-500">⏱️</span>
               </div>
-              <h2 className="text-6xl font-black tracking-tighter uppercase mb-4 text-orange-400 drop-shadow-[0_0_20px_rgba(234,88,12,0.5)]">Return to Camera</h2>
-              <p className="text-orange-100 font-bold text-3xl tracking-wide mb-6">Face tracking lost!</p>
+              <h2 className="text-6xl font-black tracking-tighter uppercase mb-4 text-orange-400 drop-shadow-[0_0_20px_rgba(234,88,12,0.5)]">Fade Away Detected</h2>
+              <p className="text-orange-100 font-bold text-3xl tracking-wide mb-6">Please return to the camera view!</p>
               
               <div className="flex flex-col items-center bg-black/50 px-10 py-6 rounded-3xl border border-orange-500/30 shadow-inner">
                 <span className="text-8xl font-mono font-black text-white mb-2 tracking-tighter leading-none">{missingFaceCountdown}</span>
