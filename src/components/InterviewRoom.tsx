@@ -60,6 +60,7 @@ export default function InterviewRoom() {
   const [feedbackHistory, setFeedbackHistory] = useState<any[]>([]);
   const trueConfidenceSumRef = useRef(0);
   const trueConfidenceCountRef = useRef(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -465,13 +466,17 @@ export default function InterviewRoom() {
         setIsCodingQuestion(evaluation.isCodingQuestion || false);
         if (evaluation.isCodingQuestion) {
           setCodeContent('// Write your code here...');
+        }
+        
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setIsTransitioning(false);
           let codingTimer = 3900; // Hard default: 65 mins
           if (evaluation.difficulty === 'easy') codingTimer = 2100; // 35 mins
           else if (evaluation.difficulty === 'medium') codingTimer = 3000; // 50 mins
-          setTimeLeft(codingTimer);
-        } else {
-          setTimeLeft(300); // Reset standard 5 min timer
-        }
+          setTimeLeft(evaluation.isCodingQuestion ? codingTimer : 300);
+        }, 2500);
+        
         setHintText('');
         setHintRequested(false);
       }
@@ -521,14 +526,16 @@ export default function InterviewRoom() {
         setQuestionIndex(prev => prev + 1);
         setIsCodingQuestion(data.isCodingQuestion || false);
         setFeedback(null);
-        if (data.isCodingQuestion) {
+        
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setIsTransitioning(false);
           let codingTimer = 3900; // Hard default
           if (data.difficulty === 'easy') codingTimer = 2100;
           else if (data.difficulty === 'medium') codingTimer = 3000;
-          setTimeLeft(codingTimer);
-        } else {
-          setTimeLeft(300); // Reset standard timer
-        }
+          setTimeLeft(data.isCodingQuestion ? codingTimer : 300);
+        }, 2500);
+        
         setHintText('');
         setHintRequested(false);
       }
@@ -859,6 +866,34 @@ export default function InterviewRoom() {
               <p className="text-orange-200/60 mt-8 font-medium max-w-md text-center text-lg leading-relaxed">
                 If you do not return to the camera frame before the timer hits 0, your interview will be instantly terminated.
               </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Next Question Transition Overlay */}
+      <AnimatePresence>
+        {isTransitioning && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="fixed inset-0 z-[150] pointer-events-none flex items-center justify-center bg-indigo-950/90 backdrop-blur-3xl"
+          >
+            <div className="flex flex-col items-center">
+              <span className="text-emerald-400 font-bold tracking-[0.4em] uppercase text-xl mb-4 animate-pulse">Ready</span>
+              <h2 className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-indigo-300 drop-shadow-[0_0_30px_rgba(99,102,241,0.5)] mb-8">
+                Question {questionIndex} / 5
+              </h2>
+              <div className="w-64 h-2 bg-white/10 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 2.5, ease: "linear" }}
+                  className="h-full bg-indigo-500 rounded-full"
+                />
+              </div>
             </div>
           </motion.div>
         )}
