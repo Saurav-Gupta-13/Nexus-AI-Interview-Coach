@@ -683,6 +683,13 @@ export default function InterviewRoom() {
                       <p className="text-sm text-slate-400 mt-1">Our 468-point facial mesh tracks lip articulation. Synthetic audio without matching mouth movement may trigger a deepfake flag.</p>
                     </div>
                   </div>
+                  <div className="flex items-start space-x-4 bg-white/5 p-5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                    <span className="text-emerald-400 font-bold text-xl mt-1">4.</span>
+                    <div>
+                      <h3 className="font-bold text-slate-200">Continuous Evaluation Flow</h3>
+                      <p className="text-sm text-slate-400 mt-1">Click "Start Speaking" to record your answer. When you click "Stop Recording" (or the timer expires), your response will automatically submit and instantly load the next question.</p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex space-x-4 w-full">
