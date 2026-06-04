@@ -372,7 +372,6 @@ export default function InterviewRoom() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsProcessing(true);
-      setActiveTab('feedback');
       
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch (e) {}
