@@ -105,8 +105,8 @@ export default function InterviewRoom() {
       setIsFinished(true);
       setConfidenceScore(0);
       setFeedbackHistory(prev => [...prev, {
-        question: "PROCTORING VIOLATION",
-        evaluation: "User left the camera frame 3 times. The interview was automatically terminated.",
+        question: "INTERVIEW TERMINATED (ANTI-CHEAT)",
+        evaluation: "User failed anti-cheat proctoring checks. Face was removed from camera view 3 times.",
         score: 0
       }]);
     }

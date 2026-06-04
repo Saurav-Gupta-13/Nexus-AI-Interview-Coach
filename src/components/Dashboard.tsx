@@ -16,9 +16,13 @@ interface DashboardProps {
 export default function Dashboard({ feedbackHistory, averageConfidence }: DashboardProps) {
   const validQuestions = feedbackHistory.filter(f => f.score > 0);
   
-  const avgTechnicalScore = validQuestions.length > 0 
-    ? Math.round(validQuestions.reduce((acc, curr) => acc + curr.score, 0) / validQuestions.length) 
-    : 0;
+  const hasCheated = feedbackHistory.some(f => f.question.includes("ANTI-CHEAT"));
+
+  const avgTechnicalScore = hasCheated 
+    ? 0 
+    : (validQuestions.length > 0 
+        ? Math.round(validQuestions.reduce((acc, curr) => acc + curr.score, 0) / validQuestions.length) 
+        : 0);
 
   // If the user failed entirely (0 technical score), wipe all other metrics to 0
   const avgCommunicationScore = avgTechnicalScore > 0 ? Math.min(100, Math.round(avgTechnicalScore * 0.9 + (Math.random() * 10))) : 0;
