@@ -53,11 +53,7 @@ export default function InterviewRoom() {
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [warningsCount, setWarningsCount] = useState(0);
   const missingFaceFramesRef = useRef(0);
-  const stateRefs = useRef({ isSetupMode, isFinished, showRulesModal });
 
-  useEffect(() => {
-    stateRefs.current = { isSetupMode, isFinished, showRulesModal };
-  }, [isSetupMode, isFinished, showRulesModal]);
 
   // New states for Step 5 (Dashboard)
   const [isFinished, setIsFinished] = useState(false);
@@ -72,6 +68,12 @@ export default function InterviewRoom() {
 
   // Anti-Cheat State
   const [isCheating, setIsCheating] = useState(false);
+
+  const stateRefs = useRef({ isSetupMode, isFinished, showRulesModal });
+
+  useEffect(() => {
+    stateRefs.current = { isSetupMode, isFinished, showRulesModal };
+  }, [isSetupMode, isFinished, showRulesModal]);
 
   // Behavioral Anti-Cheat / Proctoring hook
   useEffect(() => {
