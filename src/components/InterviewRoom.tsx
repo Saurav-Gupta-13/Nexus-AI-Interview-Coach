@@ -879,7 +879,7 @@ export default function InterviewRoom() {
       >
         
         {/* Header */}
-        <header className="flex justify-between items-center w-full px-6 py-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl">
+        <header className="sticky top-4 z-50 flex justify-between items-center w-full px-6 py-4 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
               <span className="font-bold text-white tracking-widest text-lg">AI</span>
