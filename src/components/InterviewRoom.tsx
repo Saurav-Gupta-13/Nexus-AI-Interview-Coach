@@ -620,6 +620,7 @@ export default function InterviewRoom() {
       const data = await res.json();
       if (data.question) {
         setCurrentQuestion(data.question);
+        setQuestionIndex(1);
         setIsCodingQuestion(data.isCodingQuestion || false);
         setIsSetupMode(false);
         if (data.isCodingQuestion) {
@@ -1185,7 +1186,12 @@ export default function InterviewRoom() {
                 {/* Button background glow effect */}
                 <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 
-                {isRecording ? (
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-6 h-6 text-slate-300 mr-3 relative z-10 animate-spin" />
+                    <span className="text-slate-300 font-bold tracking-wide relative z-10">Evaluating...</span>
+                  </>
+                ) : isRecording ? (
                   <>
                     <div className="w-5 h-5 bg-white rounded-sm mr-3 relative z-10 animate-pulse" />
                     <span className="text-white font-bold tracking-wide relative z-10">End Answer</span>
