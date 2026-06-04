@@ -60,7 +60,7 @@ export async function POST(req: Request) {
 You are an expert technical interviewer evaluating a candidate's answer.
 Question Asked: "${question}"
 Candidate's Spoken Answer: "${text}"
-${code ? \`Candidate's Code Submission:\n\`\`\`\n${code}\n\`\`\`\n\` : ''}
+${code ? "Candidate's Code Submission:\\n```\\n" + code + "\\n```\\n" : ""}
 Candidate's Eye-Contact/Confidence Score (from CV model): ${confidenceScore}/100
 Job Description: (Provided previously)
 Candidate's Resume Text: ${resumeText || 'No resume provided.'}
