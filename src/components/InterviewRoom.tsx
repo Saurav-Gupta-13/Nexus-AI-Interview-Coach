@@ -1060,8 +1060,8 @@ export default function InterviewRoom() {
                         <div className="absolute inset-0 border-[3px] border-transparent border-t-indigo-400 rounded-full animate-[spin_1.5s_ease-in-out_infinite]" />
                         <Loader2 className="absolute inset-0 m-auto w-10 h-10 text-indigo-400 animate-pulse" />
                       </div>
-                      <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Analyzing Intelligence...</h3>
-                      <p className="text-sm text-slate-400 font-medium tracking-wide">Evaluating conceptual depth and logic.</p>
+                      <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Synthesizing Context...</h3>
+                      <p className="text-sm text-slate-400 font-medium tracking-wide">Transcribing audio and generating your next question.</p>
                     </div>
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 opacity-60">
@@ -1085,8 +1085,8 @@ export default function InterviewRoom() {
                     <div className="absolute inset-0 border-[3px] border-transparent border-t-indigo-400 rounded-full animate-[spin_1.5s_ease-in-out_infinite]" />
                     <Loader2 className="absolute inset-0 m-auto w-10 h-10 text-indigo-400 animate-pulse" />
                   </div>
-                  <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Analyzing Code & Logic...</h3>
-                  <p className="text-sm text-slate-400 font-medium tracking-wide">Evaluating computational complexity.</p>
+                  <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Processing Submission...</h3>
+                  <p className="text-sm text-slate-400 font-medium tracking-wide">Reviewing logic to generate your next scenario.</p>
                 </div>
               )}
             </div>
