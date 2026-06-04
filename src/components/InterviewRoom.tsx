@@ -51,7 +51,8 @@ export default function InterviewRoom() {
 
   // Pre-Interview Rules & Proctoring States
   const [showRulesModal, setShowRulesModal] = useState(false);
-  const [warningsCount, setWarningsCount] = useState(0);
+  const [tabWarningsCount, setTabWarningsCount] = useState(0);
+  const [fadeWarningsCount, setFadeWarningsCount] = useState(0);
   const missingFaceFramesRef = useRef(0);
 
 
@@ -87,7 +88,7 @@ export default function InterviewRoom() {
       if (document.hidden) {
         setIsCheating(true);
         setConfidenceScore(0);
-        setWarningsCount(prev => prev + 1);
+        setTabWarningsCount(prev => prev + 1);
       } else {
         setTimeout(() => setIsCheating(false), 3000);
       }
@@ -110,7 +111,7 @@ export default function InterviewRoom() {
 
   // 3-Strike Termination Hook
   useEffect(() => {
-    if (warningsCount >= 3 && !isFinished) {
+    if ((tabWarningsCount >= 3 || fadeWarningsCount >= 3) && !isFinished) {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
       }
@@ -118,11 +119,11 @@ export default function InterviewRoom() {
       setConfidenceScore(0);
       setFeedbackHistory(prev => [...prev, {
         question: "INTERVIEW TERMINATED (ANTI-CHEAT)",
-        evaluation: "User failed anti-cheat proctoring checks. Tab switching was detected 3 times.",
+        evaluation: `User failed anti-cheat proctoring checks. ${tabWarningsCount >= 3 ? 'Tab switching was detected 3 times.' : 'Face was removed from camera 3 times.'}`,
         score: 0
       }]);
     }
-  }, [warningsCount, isFinished]);
+  }, [tabWarningsCount, fadeWarningsCount, isFinished]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -253,7 +254,10 @@ export default function InterviewRoom() {
               setMissingFaceCountdown(null);
               missingFaceFramesRef.current = 0;
             } else if (missingSeconds >= 1) { // Show countdown after 1 second of missing face
-              if (currentCountdown !== countdownValue) {
+              if (currentCountdown === null) {
+                setFadeWarningsCount(prev => prev + 1);
+                setMissingFaceCountdown(countdownValue);
+              } else if (currentCountdown !== countdownValue) {
                 setMissingFaceCountdown(countdownValue);
               }
             }
@@ -602,7 +606,8 @@ export default function InterviewRoom() {
   const handleAgreeAndStart = async () => {
     setShowRulesModal(false);
     setIsGenerating(true);
-    setWarningsCount(0);
+    setTabWarningsCount(0);
+    setFadeWarningsCount(0);
     try {
       const res = await fetch('/api/generate-question', {
         method: 'POST',
@@ -894,7 +899,11 @@ export default function InterviewRoom() {
             <div className="flex flex-col items-end">
               <span className={`text-xs uppercase tracking-wider font-bold mb-1 transition-colors ${isCheating ? 'text-rose-500 animate-pulse' : 'text-slate-400'}`}>
                 {isCheating ? '⚠️ Focus Warning' : 'Live Confidence'}
-                {warningsCount > 0 && <span className="text-rose-400 ml-2 animate-pulse">({warningsCount}/3 Strikes)</span>}
+                {(tabWarningsCount > 0 || fadeWarningsCount > 0) && (
+                  <span className="text-rose-400 ml-2 animate-pulse">
+                    (Tab: {tabWarningsCount}/3 | Fade: {fadeWarningsCount}/3)
+                  </span>
+                )}
               </span>
               <div className="flex items-center space-x-2">
                 <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
