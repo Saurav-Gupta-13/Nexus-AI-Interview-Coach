@@ -229,8 +229,8 @@ export default function InterviewRoom() {
           // No face detected!
           missingFaceFramesRef.current += 1;
           
-          // 30 fps * 3 seconds = 90 frames. If face is gone for > 3 seconds:
-          if (missingFaceFramesRef.current > 90 && !isSetupMode && !isFinished && !showRulesModal) {
+          // 30 fps * 1.5 seconds = 45 frames.
+          if (missingFaceFramesRef.current > 45 && !isSetupMode && !isFinished && !showRulesModal) {
              missingFaceFramesRef.current = 0; // Reset to avoid constant firing
              setWarningsCount(prev => prev + 1);
           }
@@ -764,24 +764,7 @@ export default function InterviewRoom() {
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
 
-      {/* Big Red Flash Warning for Anti-Cheat */}
-      <AnimatePresence>
-        {isCheating && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center bg-rose-600/20 backdrop-blur-md"
-          >
-            <div className="bg-rose-950/95 text-white px-12 py-12 rounded-3xl shadow-[0_0_150px_rgba(225,29,72,0.8)] border border-rose-500/50 flex flex-col items-center animate-pulse">
-              <span className="text-7xl mb-6 drop-shadow-[0_0_20px_rgba(225,29,72,0.8)]">⚠️</span>
-              <h2 className="text-5xl font-black tracking-tighter uppercase mb-4 text-rose-500 drop-shadow-[0_0_20px_rgba(225,29,72,0.5)]">Focus Warning</h2>
-              <p className="text-rose-100 font-bold text-2xl tracking-wide">Tab switching or looking away detected!</p>
-              <p className="text-slate-400 mt-3 font-medium">Please return your focus to the interview.</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       <motion.div 
         initial={{ opacity: 0, y: 40 }}
