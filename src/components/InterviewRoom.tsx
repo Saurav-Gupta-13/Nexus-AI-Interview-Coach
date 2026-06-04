@@ -5,7 +5,7 @@ import Webcam from 'react-webcam';
 import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Mic, MicOff, Loader2, Code2, Play, Square, Flag, Bot } from 'lucide-react';
+import { Mic, MicOff, Loader2, Code2, Play, Square, Flag, Bot, AlertTriangle } from 'lucide-react';
 import Dashboard from '@/components/Dashboard';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -52,6 +52,7 @@ export default function InterviewRoom() {
   // Pre-Interview Rules & Proctoring States
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [warningsCount, setWarningsCount] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
   const missingFaceFramesRef = useRef(0);
 
   // New states for Step 5 (Dashboard)
@@ -112,6 +113,15 @@ export default function InterviewRoom() {
       }]);
     }
   }, [warningsCount, isFinished]);
+
+  // Handle showing the warning toast
+  useEffect(() => {
+    if (warningsCount > 0 && warningsCount < 3) {
+      setShowWarning(true);
+      const timer = setTimeout(() => setShowWarning(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [warningsCount]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -219,8 +229,8 @@ export default function InterviewRoom() {
           // No face detected!
           missingFaceFramesRef.current += 1;
           
-          // 30 fps * 2 seconds = 60 frames. If face is gone for > 2 seconds:
-          if (missingFaceFramesRef.current > 60 && !isSetupMode && !isFinished && !showRulesModal) {
+          // 30 fps * 3 seconds = 90 frames. If face is gone for > 3 seconds:
+          if (missingFaceFramesRef.current > 90 && !isSetupMode && !isFinished && !showRulesModal) {
              missingFaceFramesRef.current = 0; // Reset to avoid constant firing
              setWarningsCount(prev => prev + 1);
           }
@@ -780,6 +790,26 @@ export default function InterviewRoom() {
         className="z-10 w-full max-w-[98vw] lg:max-w-[1600px] flex flex-col space-y-8"
       >
         
+        {/* Anti-Cheat Warning Toast */}
+        <AnimatePresence>
+          {showWarning && (
+            <motion.div 
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="fixed top-10 left-1/2 -translate-x-1/2 z-[150] bg-rose-600 border-2 border-rose-400 text-white px-8 py-4 rounded-2xl shadow-[0_0_40px_rgba(225,29,72,0.8)] flex items-center space-x-4 max-w-2xl"
+            >
+              <AlertTriangle className="w-10 h-10 animate-pulse text-white shrink-0" />
+              <div>
+                <h3 className="font-black text-xl tracking-wider uppercase mb-1">Proctoring Warning {warningsCount}/3</h3>
+                <p className="font-medium text-rose-100 leading-tight">
+                  Tab switching or leaving the camera view is strictly prohibited. After 3 attempts, your interview will terminate.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header */}
         <header className="flex justify-between items-center w-full px-6 py-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl">
           <div className="flex items-center space-x-3">
