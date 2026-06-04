@@ -68,12 +68,13 @@ export default function InterviewRoom() {
 
   // Anti-Cheat State
   const [isCheating, setIsCheating] = useState(false);
+  const [missingFaceCountdown, setMissingFaceCountdown] = useState<number | null>(null);
 
-  const stateRefs = useRef({ isSetupMode, isFinished, showRulesModal });
+  const stateRefs = useRef({ isSetupMode, isFinished, showRulesModal, missingFaceCountdown });
 
   useEffect(() => {
-    stateRefs.current = { isSetupMode, isFinished, showRulesModal };
-  }, [isSetupMode, isFinished, showRulesModal]);
+    stateRefs.current = { isSetupMode, isFinished, showRulesModal, missingFaceCountdown };
+  }, [isSetupMode, isFinished, showRulesModal, missingFaceCountdown]);
 
   // Behavioral Anti-Cheat / Proctoring hook
   useEffect(() => {
@@ -174,6 +175,9 @@ export default function InterviewRoom() {
         
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
           missingFaceFramesRef.current = 0; // Reset missing face tracker
+          if (stateRefs.current.missingFaceCountdown !== null) {
+            setMissingFaceCountdown(null);
+          }
           const landmarks = results.multiFaceLandmarks[0];
           
           const nose = landmarks[1];
@@ -226,14 +230,31 @@ export default function InterviewRoom() {
           // No face detected!
           missingFaceFramesRef.current += 1;
           
-          const { isSetupMode: setup, isFinished: finished, showRulesModal: rules } = stateRefs.current;
+          const { isSetupMode: setup, isFinished: finished, showRulesModal: rules, missingFaceCountdown: currentCountdown } = stateRefs.current;
           
-          // 30 fps * 1.5 seconds = 45 frames.
-          if (missingFaceFramesRef.current > 45 && !setup && !finished && !rules) {
-             missingFaceFramesRef.current = 0; // Reset to avoid constant firing
-             setWarningsCount(prev => prev + 1);
-             setIsCheating(true);
-             setTimeout(() => setIsCheating(false), 3000);
+          if (!setup && !finished && !rules) {
+            const missingSeconds = Math.floor(missingFaceFramesRef.current / 30);
+            const countdownValue = 60 - missingSeconds;
+            
+            if (countdownValue <= 0) {
+              // TERMINATE INTERVIEW
+              if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+                mediaRecorderRef.current.stop();
+              }
+              setIsFinished(true);
+              setConfidenceScore(0);
+              setFeedbackHistory(prev => [...prev, {
+                question: "INTERVIEW TERMINATED (ANTI-CHEAT)",
+                evaluation: "User failed anti-cheat proctoring checks. Face was completely missing from camera for 60 consecutive seconds.",
+                score: 0
+              }]);
+              setMissingFaceCountdown(null);
+              missingFaceFramesRef.current = 0;
+            } else if (missingSeconds >= 1) { // Show countdown after 1 second of missing face
+              if (currentCountdown !== countdownValue) {
+                setMissingFaceCountdown(countdownValue);
+              }
+            }
           }
 
           setConfidenceScore((prev) => (prev * 0.9) + (0 * 0.1));
@@ -781,6 +802,35 @@ export default function InterviewRoom() {
               <h2 className="text-5xl font-black tracking-tighter uppercase mb-4 text-rose-500 drop-shadow-[0_0_20px_rgba(225,29,72,0.5)]">Focus Warning</h2>
               <p className="text-rose-100 font-bold text-2xl tracking-wide">Proctoring Violation detected!</p>
               <p className="text-slate-400 mt-3 font-medium">Tab switching or looking away is strictly prohibited.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 60s Fade Away Countdown Warning */}
+      <AnimatePresence>
+        {missingFaceCountdown !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[105] pointer-events-none flex items-center justify-center bg-orange-900/60 backdrop-blur-xl"
+          >
+            <div className="bg-orange-950/95 text-white px-16 py-14 rounded-[3rem] shadow-[0_0_200px_rgba(234,88,12,0.6)] border-2 border-orange-500/50 flex flex-col items-center">
+              <div className="relative flex items-center justify-center mb-8">
+                <span className="text-8xl animate-pulse drop-shadow-[0_0_30px_rgba(234,88,12,1)] text-orange-500">⏱️</span>
+              </div>
+              <h2 className="text-6xl font-black tracking-tighter uppercase mb-4 text-orange-400 drop-shadow-[0_0_20px_rgba(234,88,12,0.5)]">Return to Camera</h2>
+              <p className="text-orange-100 font-bold text-3xl tracking-wide mb-6">Face tracking lost!</p>
+              
+              <div className="flex flex-col items-center bg-black/50 px-10 py-6 rounded-3xl border border-orange-500/30 shadow-inner">
+                <span className="text-8xl font-mono font-black text-white mb-2 tracking-tighter leading-none">{missingFaceCountdown}</span>
+                <span className="text-orange-300 font-bold tracking-widest uppercase text-xs">Seconds Remaining</span>
+              </div>
+              
+              <p className="text-orange-200/60 mt-8 font-medium max-w-md text-center text-lg leading-relaxed">
+                If you do not return to the camera frame before the timer hits 0, your interview will be instantly terminated.
+              </p>
             </div>
           </motion.div>
         )}
