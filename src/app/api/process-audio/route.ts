@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { checkRateLimit } from '@/lib/ratelimit';
 
-// Set Edge Runtime for maximum performance and lowest latency
-export const runtime = 'edge';
+// Use default Node.js runtime for robust audio file processing
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
