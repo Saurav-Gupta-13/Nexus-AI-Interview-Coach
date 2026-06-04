@@ -37,7 +37,6 @@ export default function InterviewRoom() {
   const [isCodingQuestion, setIsCodingQuestion] = useState(false);
   const [codeContent, setCodeContent] = useState('// Write your code here...');
   const [language, setLanguage] = useState('python');
-  const [activeTab, setActiveTab] = useState<'editor' | 'feedback'>('feedback');
 
   // New states for Live Subtitles
   const [liveTranscript, setLiveTranscript] = useState('');
@@ -466,13 +465,11 @@ export default function InterviewRoom() {
         setIsCodingQuestion(evaluation.isCodingQuestion || false);
         if (evaluation.isCodingQuestion) {
           setCodeContent('// Write your code here...');
-          setActiveTab('editor');
           let codingTimer = 3900; // Hard default: 65 mins
           if (evaluation.difficulty === 'easy') codingTimer = 2100; // 35 mins
           else if (evaluation.difficulty === 'medium') codingTimer = 3000; // 50 mins
           setTimeLeft(codingTimer);
         } else {
-          setActiveTab('feedback');
           setTimeLeft(300); // Reset standard 5 min timer
         }
         setHintText('');
@@ -523,7 +520,6 @@ export default function InterviewRoom() {
         setCurrentQuestion(data.question);
         setQuestionIndex(prev => prev + 1);
         setIsCodingQuestion(data.isCodingQuestion || false);
-        setActiveTab(data.isCodingQuestion ? 'editor' : 'feedback');
         setFeedback(null);
         if (data.isCodingQuestion) {
           let codingTimer = 3900; // Hard default
@@ -617,9 +613,7 @@ export default function InterviewRoom() {
       const data = await res.json();
       if (data.question) {
         setCurrentQuestion(data.question);
-        setQuestionIndex(1);
         setIsCodingQuestion(data.isCodingQuestion || false);
-        setActiveTab(data.isCodingQuestion ? 'editor' : 'feedback');
         setIsSetupMode(false);
         if (data.isCodingQuestion) {
           let codingTimer = 3900; // Hard default
@@ -957,29 +951,11 @@ export default function InterviewRoom() {
               </div>
             </div>
 
-            {/* Tab Navigation (Only visible if coding question) */}
-            {isCodingQuestion && (
-              <div className="flex space-x-2 bg-white/[0.02] p-1.5 rounded-2xl backdrop-blur-2xl border border-white/5 shrink-0 shadow-lg">
-                <button 
-                  onClick={() => setActiveTab('editor')} 
-                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${activeTab === 'editor' ? 'bg-indigo-600/90 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)] border border-indigo-500/50' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]'}`}
-                >
-                  Code Editor
-                </button>
-                <button 
-                  onClick={() => setActiveTab('feedback')} 
-                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-300 ${activeTab === 'feedback' ? 'bg-emerald-600/90 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] border border-emerald-500/50' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.02]'}`}
-                >
-                  AI Feedback
-                </button>
-              </div>
-            )}
-
             {/* Dynamic Content Area (Fills remaining height) */}
             <div className="flex-1 min-h-[500px] lg:min-h-[600px] relative overflow-hidden rounded-3xl border border-white/5 shadow-2xl bg-white/[0.01] backdrop-blur-2xl">
               
-              {/* CODE EDITOR TAB */}
-              {isCodingQuestion && activeTab === 'editor' && (
+              {/* CODE EDITOR */}
+              {isCodingQuestion && (
                 <div className="absolute inset-0 flex flex-col p-5 animate-in fade-in zoom-in-95 duration-500">
                   <div className="flex justify-between items-center mb-4 px-1 shrink-0">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Workspace</h3>
@@ -995,7 +971,7 @@ export default function InterviewRoom() {
                       <option value="cpp">C++</option>
                     </select>
                   </div>
-                  <div className="flex-1 rounded-xl overflow-hidden border border-slate-800">
+                  <div className="flex-1 rounded-xl overflow-hidden border border-slate-800 relative">
                     <Editor
                       height="100%"
                       language={language}
@@ -1031,62 +1007,43 @@ export default function InterviewRoom() {
                 </div>
               )}
 
-              {/* FEEDBACK & STATUS TAB */}
-              {(!isCodingQuestion || activeTab === 'feedback') && (
+              {/* NON-CODING STATUS VIEW */}
+              {!isCodingQuestion && (
                 <div className="absolute inset-0 flex flex-col bg-gradient-to-br from-white/[0.02] to-transparent animate-in fade-in slide-in-from-bottom-4 duration-700 overflow-y-auto custom-scrollbar">
                   {isProcessing ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-8">
-                      <div className="relative w-20 h-20 mb-8">
+                      <div className="relative w-24 h-24 mb-8">
                         <div className="absolute inset-0 border-[3px] border-indigo-500/20 rounded-full animate-[spin_4s_linear_infinite]" />
                         <div className="absolute inset-0 border-[3px] border-transparent border-t-indigo-400 rounded-full animate-[spin_1.5s_ease-in-out_infinite]" />
-                        <Loader2 className="absolute inset-0 m-auto w-8 h-8 text-indigo-400 animate-pulse" />
+                        <Loader2 className="absolute inset-0 m-auto w-10 h-10 text-indigo-400 animate-pulse" />
                       </div>
-                      <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Analyzing Intelligence...</h3>
+                      <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Analyzing Intelligence...</h3>
                       <p className="text-sm text-slate-400 font-medium tracking-wide">Evaluating conceptual depth and logic.</p>
                     </div>
-                  ) : feedback ? (
-                    <div className="p-8 space-y-8">
-                      <div className="flex justify-between items-end pb-6 border-b border-white/5">
-                        <div>
-                          <span className="block text-[10px] uppercase tracking-[0.3em] text-emerald-400 font-bold mb-2">Result</span>
-                          <h3 className="text-3xl font-black text-white tracking-tight">Evaluation</h3>
-                        </div>
-                        <div className="text-right">
-                          <span className="block text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold mb-2">Total Score</span>
-                          <span className={`text-4xl font-black text-transparent bg-clip-text drop-shadow-sm ${
-                            feedback.score > 80 ? 'bg-gradient-to-br from-emerald-400 to-cyan-400' :
-                            feedback.score > 50 ? 'bg-gradient-to-br from-amber-400 to-orange-400' :
-                            'bg-gradient-to-br from-rose-500 to-red-500'
-                          }`}>
-                            {feedback.score}/100
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-white/[0.02] p-5 rounded-2xl border border-white/5 shadow-inner">
-                        <h4 className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold mb-3">Audio Transcription</h4>
-                        <p className="text-slate-300 italic text-sm leading-relaxed font-light">
-                          "{feedback.transcribedText || 'No audio detected.'}"
-                        </p>
-                      </div>
-
-                      <div className="space-y-6">
-                        <div>
-                          <h4 className="text-[10px] uppercase tracking-[0.2em] text-indigo-400 font-bold mb-3">Technical Assessment</h4>
-                          <p className="text-slate-200 leading-relaxed text-sm bg-black/40 p-5 rounded-2xl border border-white/5">{feedback.evaluation}</p>
-                        </div>
-                        <div>
-                          <h4 className="text-[10px] uppercase tracking-[0.2em] text-amber-400 font-bold mb-3">Actionable Tip</h4>
-                          <p className="text-slate-200 leading-relaxed text-sm bg-black/40 p-5 rounded-2xl border border-white/5">{feedback.feedback_tip}</p>
-                        </div>
-                      </div>
-                    </div>
                   ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-8 opacity-40">
-                      <Bot className="w-12 h-12 text-slate-500 mb-4 opacity-50" />
-                      <p className="text-slate-400 text-sm tracking-wide font-medium">Evaluation pending audio input.</p>
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 opacity-60">
+                      <div className="relative w-32 h-32 mb-6">
+                        <div className="absolute inset-0 border-2 border-indigo-500/20 rounded-full animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" />
+                        <div className="absolute inset-4 border border-emerald-500/30 rounded-full animate-[spin_10s_linear_infinite]" />
+                        <Bot className="absolute inset-0 m-auto w-12 h-12 text-slate-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-300 tracking-widest uppercase text-center">Listening Mode Active</h3>
+                      <p className="text-slate-500 mt-2 font-medium text-center max-w-sm">Please speak your answer clearly. The AI will evaluate your response in the background upon submission.</p>
                     </div>
                   )}
+                </div>
+              )}
+              
+              {/* PROCESSING OVERLAY FOR CODING QUESTIONS */}
+              {isCodingQuestion && isProcessing && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-xl animate-in fade-in zoom-in duration-500">
+                  <div className="relative w-24 h-24 mb-8">
+                    <div className="absolute inset-0 border-[3px] border-indigo-500/20 rounded-full animate-[spin_4s_linear_infinite]" />
+                    <div className="absolute inset-0 border-[3px] border-transparent border-t-indigo-400 rounded-full animate-[spin_1.5s_ease-in-out_infinite]" />
+                    <Loader2 className="absolute inset-0 m-auto w-10 h-10 text-indigo-400 animate-pulse" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Analyzing Code & Logic...</h3>
+                  <p className="text-sm text-slate-400 font-medium tracking-wide">Evaluating computational complexity.</p>
                 </div>
               )}
             </div>
