@@ -76,6 +76,7 @@ export default function InterviewRoom() {
       if (document.hidden) {
         setIsCheating(true);
         setConfidenceScore(0);
+        setWarningsCount(prev => prev + 1);
       } else {
         setTimeout(() => setIsCheating(false), 3000);
       }
@@ -106,7 +107,7 @@ export default function InterviewRoom() {
       setConfidenceScore(0);
       setFeedbackHistory(prev => [...prev, {
         question: "INTERVIEW TERMINATED (ANTI-CHEAT)",
-        evaluation: "User failed anti-cheat proctoring checks. Face was removed from camera view 3 times.",
+        evaluation: "User failed anti-cheat proctoring checks (Face removed from camera OR switched tabs) 3 times.",
         score: 0
       }]);
     }
