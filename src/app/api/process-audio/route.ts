@@ -18,11 +18,15 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
-    const file = formData.get('audio') as Blob;
+    const rawFile = formData.get('audio') as Blob;
     
-    if (!file || file.size === 0) {
+    if (!rawFile || rawFile.size === 0) {
       return NextResponse.json({ error: 'No audio file provided' }, { status: 400 });
     }
+
+    // Force the lazy stream into memory to prevent Vercel Node runtime hanging
+    const arrayBuffer = await rawFile.arrayBuffer();
+    const file = new File([arrayBuffer], 'recording.webm', { type: 'audio/webm' });
 
     const question = formData.get('question') as string;
     const confidenceScore = parseInt(formData.get('confidenceScore') as string || '0', 10);
@@ -32,7 +36,7 @@ export async function POST(req: Request) {
 
     // 1. Transcribe Audio (Extremely fast via Groq Whisper)
     const transcription = await groq.audio.transcriptions.create({
-      file: file as any, // Cast to any for Next.js File object compatibility
+      file: file, // Fully loaded memory File object
       model: 'whisper-large-v3',
       prompt: 'Interview response, clear professional English.',
       response_format: 'json',
