@@ -66,6 +66,9 @@ export default function InterviewRoom() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [feedback, setFeedback] = useState<any>(null);
 
+  const isTimeUpRef = useRef(false);
+  const submitRef = useRef<() => void>();
+
   // Anti-Cheat State
   const [isCheating, setIsCheating] = useState(false);
   const [missingFaceCountdown, setMissingFaceCountdown] = useState<number | null>(null);
@@ -129,9 +132,8 @@ export default function InterviewRoom() {
           if (prev <= 1) {
             clearInterval(timer);
             // Auto-submit when time is up
-            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-              mediaRecorderRef.current.stop();
-            }
+            isTimeUpRef.current = true;
+            if (submitRef.current) submitRef.current();
             return 0;
           }
           return prev - 1;
@@ -377,21 +379,40 @@ export default function InterviewRoom() {
     }
   };
 
+  // Keep submitRef up to date with the latest processAudio closure
+  useEffect(() => {
+    submitRef.current = () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      } else {
+        processAudio();
+      }
+    };
+  });
+
   const processAudio = async () => {
     try {
+      let finalTranscript = "No audio recorded.";
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
+      
+      if (audioBlob.size > 0) {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
 
-      // 1. Transcribe Audio
-      const transcribeRes = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-      });
-      const { text } = await transcribeRes.json();
+        // 1. Transcribe Audio
+        const transcribeRes = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: formData,
+        });
+        const { text } = await transcribeRes.json();
 
-      const cleanedText = text?.trim().toLowerCase() || '';
-      if (!cleanedText || cleanedText === "thank you." || cleanedText === "thanks for watching." || cleanedText === "thank you" || cleanedText.includes("amara.org")) {
+        const cleanedText = text?.trim().toLowerCase() || '';
+        if (cleanedText && cleanedText !== "thank you." && cleanedText !== "thanks for watching." && !cleanedText.includes("amara.org")) {
+          finalTranscript = text;
+        } else if (!isTimeUpRef.current) {
+          throw new Error("No voice detected. Please check your system microphone settings and speak clearly.");
+        }
+      } else if (!isTimeUpRef.current) {
         throw new Error("No voice detected. Please check your system microphone settings and speak clearly.");
       }
 
@@ -412,7 +433,7 @@ export default function InterviewRoom() {
       const evaluation = await evaluateRes.json();
       
       // Inject transcribed text into evaluation to display in UI
-      evaluation.transcribedText = text;
+      evaluation.transcribedText = finalTranscript;
       
       // Apply hint penalty if requested
       let finalScore = evaluation.score || 0;
@@ -458,6 +479,7 @@ export default function InterviewRoom() {
       alert(error.message || "Failed to process answer.");
     } finally {
       setIsProcessing(false);
+      isTimeUpRef.current = false;
     }
   };
 
