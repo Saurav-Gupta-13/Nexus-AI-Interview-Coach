@@ -401,35 +401,43 @@ export default function InterviewRoom() {
       let finalTranscript = "No audio recorded.";
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
       
-      if (audioBlob.size === 0) {
+      if (audioBlob.size > 0) {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+
+        // Step 1: Transcribe Audio
+        const transcribeRes = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: formData,
+        });
+        const { text } = await transcribeRes.json();
+
+        const cleanedText = text?.trim().toLowerCase() || '';
+        if (cleanedText && cleanedText !== "thank you." && cleanedText !== "thanks for watching." && !cleanedText.includes("amara.org")) {
+          finalTranscript = text;
+        } else if (!isTimeUpRef.current) {
+          throw new Error("No voice detected. Please check your system microphone settings and speak clearly.");
+        }
+      } else if (!isTimeUpRef.current) {
         throw new Error("No voice detected. Please check your system microphone settings and speak clearly.");
       }
 
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
-      formData.append('question', currentQuestion);
-      formData.append('confidenceScore', Math.round(confidenceScore).toString());
-      if (isCodingQuestion && codeContent) {
-        formData.append('code', codeContent);
-      }
-      if (resumeText) {
-        formData.append('resumeText', resumeText);
-      }
-      formData.append('questionIndex', questionIndex.toString());
-
-      // Call the highly optimized Edge combined API route
-      const evaluateRes = await fetch('/api/process-audio', {
+      // Step 2: Evaluate Answer via Groq
+      const evaluateRes = await fetch('/api/evaluate', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: currentQuestion,
+          answer: finalTranscript,
+          confidenceScore: Math.round(confidenceScore),
+          code: isCodingQuestion ? codeContent : null,
+          resumeText,
+          questionIndex
+        })
       });
 
       const evaluation = await evaluateRes.json();
-
-      if (!evaluateRes.ok) {
-        throw new Error(evaluation.error || "Failed to process audio.");
-      }
-      
-      finalTranscript = evaluation.transcribedText || "No audio detected.";
+      evaluation.transcribedText = finalTranscript;
       
       // Apply hint penalty if requested
       let finalScore = evaluation.score || 0;
