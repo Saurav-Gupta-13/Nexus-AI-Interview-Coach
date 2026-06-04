@@ -451,7 +451,8 @@ export default function InterviewRoom() {
       setFeedbackHistory(prev => [...prev, {
         question: currentQuestion,
         evaluation: evaluation.evaluation,
-        score: finalScore
+        score: finalScore,
+        transcribedText: finalTranscript
       }]);
 
       // If the AI suggested a next question in the evaluation, we can use it!
@@ -472,7 +473,7 @@ export default function InterviewRoom() {
           if (evaluation.difficulty === 'easy') codingTimer = 2100; // 35 mins
           else if (evaluation.difficulty === 'medium') codingTimer = 3000; // 50 mins
           setTimeLeft(evaluation.isCodingQuestion ? codingTimer : 300);
-        }, 2500);
+        }, 1200);
         
         setHintText('');
         setHintRequested(false);
@@ -869,27 +870,25 @@ export default function InterviewRoom() {
         )}
       </AnimatePresence>
 
-      {/* Next Question Transition Overlay */}
+      {/* Next Question Flash Card */}
       <AnimatePresence>
         {isTransitioning && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="fixed inset-0 z-[150] pointer-events-none flex items-center justify-center bg-indigo-950/90 backdrop-blur-3xl"
+            initial={{ opacity: 0, y: -30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.9 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[150] pointer-events-none"
           >
-            <div className="flex flex-col items-center">
-              <span className="text-emerald-400 font-bold tracking-[0.4em] uppercase text-xl mb-4 animate-pulse">Ready</span>
-              <h2 className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-indigo-300 drop-shadow-[0_0_30px_rgba(99,102,241,0.5)] mb-8">
-                Question {questionIndex} / 5
-              </h2>
-              <div className="w-64 h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="flex items-center space-x-4 px-8 py-4 bg-indigo-600/90 backdrop-blur-xl rounded-2xl border border-indigo-400/30 shadow-[0_10px_40px_rgba(99,102,241,0.5)]">
+              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="text-white font-bold text-lg tracking-wide">Question {questionIndex} / 5</span>
+              <div className="w-20 h-1.5 bg-white/20 rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
-                  transition={{ duration: 2.5, ease: "linear" }}
-                  className="h-full bg-indigo-500 rounded-full"
+                  transition={{ duration: 1.2, ease: "linear" }}
+                  className="h-full bg-emerald-400 rounded-full"
                 />
               </div>
             </div>

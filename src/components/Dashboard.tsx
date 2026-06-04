@@ -6,6 +6,7 @@ interface FeedbackItem {
   question: string;
   evaluation: string;
   score: number;
+  transcribedText?: string;
 }
 
 interface DashboardProps {
@@ -120,9 +121,20 @@ export default function Dashboard({ feedbackHistory, averageConfidence }: Dashbo
                 {item.score}/100
               </span>
             </div>
-            <p className="text-slate-300 text-sm leading-relaxed bg-black/20 p-4 rounded-xl border border-white/5">
-              {item.evaluation}
-            </p>
+            {item.transcribedText && item.transcribedText !== "No audio recorded." && (
+              <div className="mb-3">
+                <span className="text-xs uppercase tracking-widest text-indigo-400 font-bold">Your Answer</span>
+                <p className="text-slate-200 text-sm leading-relaxed bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 mt-1 italic">
+                  "{item.transcribedText}"
+                </p>
+              </div>
+            )}
+            <div>
+              <span className="text-xs uppercase tracking-widest text-slate-500 font-bold">AI Evaluation</span>
+              <p className="text-slate-300 text-sm leading-relaxed bg-black/20 p-4 rounded-xl border border-white/5 mt-1">
+                {item.evaluation}
+              </p>
+            </div>
           </Card>
         ))}
       </div>
