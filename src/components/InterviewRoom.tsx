@@ -114,7 +114,7 @@ export default function InterviewRoom() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isRecording && timeLeft > 0) {
+    if (!isSetupMode && !isFinished && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -130,7 +130,7 @@ export default function InterviewRoom() {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isRecording, timeLeft]);
+  }, [isSetupMode, isFinished, timeLeft]);
 
 
 
@@ -881,7 +881,7 @@ export default function InterviewRoom() {
             )}
 
             {/* Dynamic Content Area (Fills remaining height) */}
-            <div className="flex-1 relative overflow-hidden rounded-3xl border border-white/5 shadow-2xl bg-white/[0.01] backdrop-blur-2xl">
+            <div className="flex-1 min-h-[500px] lg:min-h-[600px] relative overflow-hidden rounded-3xl border border-white/5 shadow-2xl bg-white/[0.01] backdrop-blur-2xl">
               
               {/* CODE EDITOR TAB */}
               {isCodingQuestion && activeTab === 'editor' && (
