@@ -158,12 +158,13 @@ export default function InterviewRoom() {
       document.title = `⚠️ RETURN IN ${remaining}s!`;
       
       // Update Native Notification to act as a literal floating flash card timer!
-      if ("Notification" in window && Notification.permission === "granted") {
+      // To prevent browser spam throttling, we only update it at 5s and 2s
+      if ((remaining === 5 || remaining === 2) && "Notification" in window && Notification.permission === "granted") {
         new Notification("⚠️ TAB SWITCH DETECTED", {
           body: `Return to the interview within ${remaining} seconds or it will be terminated!`,
           icon: "/favicon.ico",
-          tag: "anti-cheat-timer", // This replaces the previous notification to create an OS-level countdown!
-          silent: true // Don't trigger OS ding every second
+          tag: "anti-cheat-timer", 
+          silent: true 
         });
       }
       
