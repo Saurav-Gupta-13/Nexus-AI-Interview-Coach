@@ -116,14 +116,52 @@ export default function InterviewRoom() {
       return;
     }
     
+    // Create an audio context for the alarm beep
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    const playWarningBeep = () => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // High pitch A5
+      oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.2); // Drop to A4
+      
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Loud volume
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.3);
+    };
+
+    // Play immediate beep and trigger native notification
+    playWarningBeep();
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("⚠️ TAB SWITCH DETECTED", {
+        body: `Return to the interview within 10 seconds or it will be terminated!`,
+        icon: "/favicon.ico",
+        requireInteraction: true // Keeps the notification on screen until clicked
+      });
+    }
+    
     const interval = setInterval(() => {
       const timeAway = Date.now() - tabSwitchTimeRef.current;
       const remaining = Math.max(0, 10 - Math.floor(timeAway / 1000));
       setTabAwaySeconds(remaining);
       document.title = `⚠️ RETURN IN ${remaining}s!`;
-    }, 500);
+      
+      // Keep beeping every second!
+      playWarningBeep();
+    }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      audioCtx.close();
+    };
   }, [isCheating]);
 
   // 3-Strike Termination Hook
@@ -618,6 +656,13 @@ export default function InterviewRoom() {
     if (!jobDescription.trim()) {
       alert("Please enter a job description first.");
       return;
+    }
+    
+    // Request Native Notification Permission
+    if ("Notification" in window) {
+      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        await Notification.requestPermission();
+      }
     }
     
     // Show the rules modal instead of starting directly
