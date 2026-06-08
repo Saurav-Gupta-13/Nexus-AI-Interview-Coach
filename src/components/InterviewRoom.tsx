@@ -59,6 +59,7 @@ export default function InterviewRoom() {
   // New states for Step 5 (Dashboard)
   const [isFinished, setIsFinished] = useState(false);
   const [feedbackHistory, setFeedbackHistory] = useState<any[]>([]);
+  const [tabAwaySeconds, setTabAwaySeconds] = useState(10);
   const trueConfidenceSumRef = useRef(0);
   const trueConfidenceCountRef = useRef(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -107,6 +108,23 @@ export default function InterviewRoom() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isSetupMode, isFinished]);
+
+  useEffect(() => {
+    if (!isCheating) {
+      setTabAwaySeconds(10);
+      document.title = "Nexus AI Interview Coach";
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      const timeAway = Date.now() - tabSwitchTimeRef.current;
+      const remaining = Math.max(0, 10 - Math.floor(timeAway / 1000));
+      setTabAwaySeconds(remaining);
+      document.title = `⚠️ RETURN IN ${remaining}s!`;
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [isCheating]);
 
   // 3-Strike Termination Hook
   useEffect(() => {
@@ -303,37 +321,32 @@ export default function InterviewRoom() {
 
     faceMesh.onResults(onResults);
 
-    let camera: any = null;
+    let animationFrameId: number;
 
-    // Give React a tiny fraction of a second to attach the ref to the DOM
-    const timeoutId = setTimeout(() => {
+    const processFrame = async () => {
       if (
-        typeof window !== 'undefined' &&
         webcamRef.current &&
-        webcamRef.current.video
+        webcamRef.current.video &&
+        webcamRef.current.video.readyState === 4
       ) {
-        camera = new window.Camera(webcamRef.current.video, {
-          onFrame: async () => {
-            if (webcamRef.current?.video) {
-              try {
-                await faceMesh.send({ image: webcamRef.current.video });
-              } catch (e) {
-                // Ignore errors if faceMesh is already closed
-              }
-            }
-          },
-          width: 640,
-          height: 480,
-        });
-        camera.start().then(() => setIsLoaded(true));
+        try {
+          await faceMesh.send({ image: webcamRef.current.video });
+          if (!isLoaded) setIsLoaded(true);
+        } catch (e) {
+          // Ignore errors if faceMesh is closed
+        }
       }
+      animationFrameId = requestAnimationFrame(processFrame);
+    };
+
+    // Give React a tiny fraction of a second to attach the ref
+    const timeoutId = setTimeout(() => {
+      processFrame();
     }, 100);
 
     return () => {
       clearTimeout(timeoutId);
-      if (camera && typeof camera.stop === 'function') {
-        camera.stop();
-      }
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       try {
         faceMesh.close();
       } catch (e) {}
@@ -842,7 +855,9 @@ export default function InterviewRoom() {
               <span className="text-7xl mb-6 drop-shadow-[0_0_20px_rgba(225,29,72,0.8)]">⚠️</span>
               <h2 className="text-5xl font-black tracking-tighter uppercase mb-4 text-rose-500 drop-shadow-[0_0_20px_rgba(225,29,72,0.5)]">Focus Warning</h2>
               <p className="text-rose-100 font-bold text-2xl tracking-wide">Tab Switching Detected!</p>
-              <p className="text-slate-400 mt-3 font-medium">Please return your focus to the interview.</p>
+              <div className="text-8xl font-black text-white my-6 tabular-nums">{tabAwaySeconds}s</div>
+              <p className="text-slate-400 font-medium">Please return your focus to the interview.</p>
+              <p className="text-rose-400 text-sm mt-2">Interview will terminate if you stay away.</p>
             </div>
           </motion.div>
         )}
