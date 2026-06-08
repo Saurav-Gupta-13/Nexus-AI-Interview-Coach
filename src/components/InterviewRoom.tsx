@@ -149,6 +149,8 @@ export default function InterviewRoom() {
     }
     
     const interval = setInterval(() => {
+      if (!document.hidden || isFinished) return; // Stop beeping if they return or if terminated
+
       const timeAway = Date.now() - tabSwitchTimeRef.current;
       const remaining = Math.max(0, 10 - Math.floor(timeAway / 1000));
       setTabAwaySeconds(remaining);
@@ -162,7 +164,7 @@ export default function InterviewRoom() {
       clearInterval(interval);
       audioCtx.close();
     };
-  }, [isCheating]);
+  }, [isCheating, isFinished]);
 
   // 3-Strike Termination Hook
   useEffect(() => {
@@ -171,6 +173,7 @@ export default function InterviewRoom() {
         mediaRecorderRef.current.stop();
       }
       setIsFinished(true);
+      setIsCheating(false); // Stop cheating state immediately
       setConfidenceScore(0);
       setFeedbackHistory(prev => [...prev, {
         question: "INTERVIEW TERMINATED (ANTI-CHEAT)",
