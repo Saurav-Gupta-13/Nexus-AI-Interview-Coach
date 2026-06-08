@@ -53,6 +53,7 @@ export default function InterviewRoom() {
   const [tabWarningsCount, setTabWarningsCount] = useState(0);
   const [fadeWarningsCount, setFadeWarningsCount] = useState(0);
   const missingFaceFramesRef = useRef(0);
+  const tabSwitchTimeRef = useRef<number>(0);
 
 
   // New states for Step 5 (Dashboard)
@@ -89,7 +90,13 @@ export default function InterviewRoom() {
         setIsCheating(true);
         setConfidenceScore(0);
         setTabWarningsCount(prev => prev + 1);
+        tabSwitchTimeRef.current = Date.now();
       } else {
+        const timeAway = Date.now() - tabSwitchTimeRef.current;
+        if (tabSwitchTimeRef.current > 0 && timeAway > 10000) {
+          // If they were away for more than 10 seconds, forcefully terminate
+          setTabWarningsCount(999);
+        }
         setTimeout(() => setIsCheating(false), 3000);
       }
     };
@@ -111,7 +118,7 @@ export default function InterviewRoom() {
       setConfidenceScore(0);
       setFeedbackHistory(prev => [...prev, {
         question: "INTERVIEW TERMINATED (ANTI-CHEAT)",
-        evaluation: `User failed anti-cheat proctoring checks. ${tabWarningsCount >= 3 ? 'Tab switching was detected 3 times.' : 'Face was removed from camera 3 times.'}`,
+        evaluation: `User failed anti-cheat proctoring checks. ${tabWarningsCount >= 999 ? 'User switched tabs for more than 10 seconds.' : tabWarningsCount >= 3 ? 'Tab switching was detected 3 times.' : 'Face was removed from camera 3 times.'}`,
         score: 0
       }]);
     }
@@ -1010,7 +1017,12 @@ export default function InterviewRoom() {
                       <option value="cpp">C++</option>
                     </select>
                   </div>
-                  <div className="flex-1 rounded-xl overflow-hidden border border-slate-800 relative">
+                  <div 
+                    className="flex-1 rounded-xl overflow-hidden border border-slate-800 relative"
+                    onCopyCapture={(e) => { e.preventDefault(); alert("ANTI-CHEAT: Copying is strictly disabled during the interview."); }}
+                    onPasteCapture={(e) => { e.preventDefault(); alert("ANTI-CHEAT: Pasting is strictly disabled during the interview."); }}
+                    onCutCapture={(e) => { e.preventDefault(); alert("ANTI-CHEAT: Cutting is strictly disabled during the interview."); }}
+                  >
                     <Editor
                       height="100%"
                       language={language}
@@ -1021,7 +1033,8 @@ export default function InterviewRoom() {
                         minimap: { enabled: false },
                         fontSize: 14,
                         fontFamily: 'var(--font-outfit)',
-                        padding: { top: 16 }
+                        padding: { top: 16 },
+                        contextmenu: false // Disable right-click in editor
                       }}
                     />
                     
