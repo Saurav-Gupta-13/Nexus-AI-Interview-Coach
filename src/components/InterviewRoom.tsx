@@ -698,22 +698,22 @@ export default function InterviewRoom() {
                   <div className="flex items-start space-x-4 bg-white/5 p-5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
                     <span className="text-emerald-400 font-bold text-xl mt-1">2.</span>
                     <div>
-                      <h3 className="font-bold text-slate-200">No Tab Switching</h3>
-                      <p className="text-sm text-slate-400 mt-1">Navigating away from this browser tab will instantly drop your confidence score to 0% and flag your profile.</p>
+                      <h3 className="font-bold text-slate-200">Strict Tab Switching Limit</h3>
+                      <p className="text-sm text-slate-400 mt-1">Navigating away from this browser tab triggers a countdown. If you do not return within <strong>10 seconds</strong>, the interview is instantly terminated.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4 bg-white/5 p-5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
                     <span className="text-emerald-400 font-bold text-xl mt-1">3.</span>
                     <div>
-                      <h3 className="font-bold text-slate-200">Lip-Sync Verification</h3>
-                      <p className="text-sm text-slate-400 mt-1">Our 468-point facial mesh tracks lip articulation. Synthetic audio without matching mouth movement may trigger a deepfake flag.</p>
+                      <h3 className="font-bold text-slate-200">Code Editor Lockdown</h3>
+                      <p className="text-sm text-slate-400 mt-1">Copying, pasting, cutting, and the right-click context menu are strictly disabled in the code editor to prevent plagiarism.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4 bg-white/5 p-5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
                     <span className="text-emerald-400 font-bold text-xl mt-1">4.</span>
                     <div>
                       <h3 className="font-bold text-slate-200">Continuous Evaluation Flow</h3>
-                      <p className="text-sm text-slate-400 mt-1">Click "Start Speaking" to record your answer. When you click "Stop Recording" (or the timer expires), your response will automatically submit and instantly load the next question.</p>
+                      <p className="text-sm text-slate-400 mt-1">Click "Start Speaking" to record your answer. When you click "Stop Recording", your response automatically submits and instantly loads the next question.</p>
                     </div>
                   </div>
                 </div>
