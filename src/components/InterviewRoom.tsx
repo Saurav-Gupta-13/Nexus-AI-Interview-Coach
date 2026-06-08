@@ -138,13 +138,14 @@ export default function InterviewRoom() {
       oscillator.stop(audioCtx.currentTime + 0.3);
     };
 
-    // Play immediate beep and trigger native notification
+    // Play immediate beep and trigger initial native notification
     playWarningBeep();
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification("⚠️ TAB SWITCH DETECTED", {
         body: `Return to the interview within 10 seconds or it will be terminated!`,
         icon: "/favicon.ico",
-        requireInteraction: true // Keeps the notification on screen until clicked
+        tag: "anti-cheat-timer",
+        requireInteraction: true
       });
     }
     
@@ -155,6 +156,16 @@ export default function InterviewRoom() {
       const remaining = Math.max(0, 10 - Math.floor(timeAway / 1000));
       setTabAwaySeconds(remaining);
       document.title = `⚠️ RETURN IN ${remaining}s!`;
+      
+      // Update Native Notification to act as a literal floating flash card timer!
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("⚠️ TAB SWITCH DETECTED", {
+          body: `Return to the interview within ${remaining} seconds or it will be terminated!`,
+          icon: "/favicon.ico",
+          tag: "anti-cheat-timer", // This replaces the previous notification to create an OS-level countdown!
+          silent: true // Don't trigger OS ding every second
+        });
+      }
       
       // Keep beeping every second!
       playWarningBeep();
@@ -762,6 +773,13 @@ export default function InterviewRoom() {
                     <div>
                       <h3 className="font-bold text-slate-200">Continuous Evaluation Flow</h3>
                       <p className="text-sm text-slate-400 mt-1">Click "Start Speaking" to record your answer. When you click "Stop Recording", your response automatically submits and instantly loads the next question.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4 bg-white/5 p-5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                    <span className="text-emerald-400 font-bold text-xl mt-1">5.</span>
+                    <div>
+                      <h3 className="font-bold text-slate-200">Global Notifications & Audio Tracking</h3>
+                      <p className="text-sm text-slate-400 mt-1">If you switch tabs, a native OS notification will float over your apps to display the 10-second countdown timer, accompanied by an audio siren.</p>
                     </div>
                   </div>
                 </div>
